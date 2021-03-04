@@ -9,6 +9,7 @@
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "bin": {
+        "scribble-out-desc": "dist/bin/scribble_out_desc.js",
         "scribble": "dist/bin/scribble.js"
     },
     "dependencies": {
