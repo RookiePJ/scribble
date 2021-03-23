@@ -37,6 +37,7 @@ export type InstrumentationMetaData = {
     otherInstrumentation: string[];
     originalSourceList: string[];
     instrSourceList: string[];
+    scribbleVersion: string;
 };
 
 /**
@@ -183,7 +184,8 @@ function rangeToSrc(range: Range, fileIdx: number): string {
 function generatePropertyMap(
     ctx: InstrumentationContext,
     newSrcMap: SrcRangeMap,
-    instrSourceList: string[]
+    instrSourceList: string[],
+    originalSourceList: string[]
 ): PropertyMap {
     const result: PropertyMap = [];
 
@@ -225,8 +227,10 @@ function generatePropertyMap(
         const annotationRange = annotation.annotationFileRange;
         const debugEvent = ctx.debugEventDefs.get(annotation.id);
         const signature = debugEvent !== undefined ? debugEvent.canonicalSignature : "";
-        const propertySource = rangeToSrc(predRange, unit.sourceListIndex);
-        const annotationSource = rangeToSrc(annotationRange, unit.sourceListIndex);
+
+        const newUnitIdx = originalSourceList.indexOf(unit.absolutePath);
+        const propertySource = rangeToSrc(predRange, newUnitIdx);
+        const annotationSource = rangeToSrc(annotationRange, newUnitIdx);
 
         const instrumentationRanges = dedup(
             (ctx.evaluationStatements.get(annotation) as ASTNode[]).map((node) => {
@@ -292,18 +296,22 @@ export function generateInstrumentationMetadata(
     newSrcMap: SrcRangeMap,
     originalUnits: SourceUnit[],
     arm: boolean,
+    scribbleVersion: string,
     outputFile?: string
 ): InstrumentationMetaData {
     const utilsUnit = ctx.utilsUnit;
+
     let originalSourceList: string[] = originalUnits
         .filter((unit) => unit !== utilsUnit)
         .map((unit) => unit.absolutePath);
+
     let instrSourceList: string[];
 
     if (ctx.outputMode === "files") {
         instrSourceList = [...originalSourceList, utilsUnit.absolutePath];
     } else {
         assert(outputFile !== undefined, `Must provide output file in ${ctx.outputMode} mode`);
+
         instrSourceList = [outputFile];
     }
 
@@ -316,7 +324,7 @@ export function generateInstrumentationMetadata(
         instrSourceList
     );
 
-    const propertyMap = generatePropertyMap(ctx, newSrcMap, instrSourceList);
+    const propertyMap = generatePropertyMap(ctx, newSrcMap, instrSourceList, originalSourceList);
 
     instrSourceList = instrSourceList.map((name) =>
         name === "--" || name === utilsUnit.absolutePath ? name : name + ".instrumented"
@@ -331,7 +339,8 @@ export function generateInstrumentationMetadata(
         otherInstrumentation,
         propertyMap,
         originalSourceList,
-        instrSourceList
+        instrSourceList,
+        scribbleVersion
     };
 }
 
@@ -351,6 +360,7 @@ export function buildOutputJSON(
     flatCompiled: CompileResult,
     sortedUnits: SourceUnit[],
     newSrcMap: SrcRangeMap,
+    scribbleVersion: string,
     outputFile: string,
     arm: boolean
 ): any {
@@ -367,6 +377,7 @@ export function buildOutputJSON(
         newSrcMap,
         sortedUnits,
         arm,
+        scribbleVersion,
         outputFile
     );
 
