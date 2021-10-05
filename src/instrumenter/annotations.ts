@@ -280,7 +280,6 @@ class AnnotationExtractor {
     ): AnnotationMetaData {
         const slice = meta.text.slice(match.index);
         let parsedAnnot: SAnnotation;
-
         try {
             parsedAnnot = parseAnnotation(slice, meta.node, this.version);
         } catch (e) {
@@ -440,7 +439,7 @@ class AnnotationExtractor {
         const result: AnnotationMetaData[] = [];
 
         const rx =
-            /\s*(\*|\/\/\/)\s*#?(if_succeeds|if_updated|if_assigned|invariant|assert|define\s*[a-zA-Z0-9_]*\s*\([^)]*\))/g;
+            /\s*(\*|\/\/\/)\s*@custom:scribble\s*#?(if_succeeds|if_updated|if_assigned|invariant|assert|define\s*[a-zA-Z0-9_]*\s*\([^)]*\))/g;
 
         let match = rx.exec(meta.text);
 
@@ -482,7 +481,6 @@ class AnnotationExtractor {
         }
 
         const unit = getScopeUnit(target);
-
         const source = sources.get(unit.absolutePath) as string;
         const annotations = this.findAnnotations(raw, target, source, filters);
 
