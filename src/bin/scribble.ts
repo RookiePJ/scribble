@@ -683,7 +683,6 @@ if ("version" in options) {
                 filterOptions,
                 compilerVersionUsed
             );
-
         } catch (e) {
             if (e instanceof SyntaxError || e instanceof UnsupportedByTargetError) {
                 const unit = getScopeUnit(e.target);
