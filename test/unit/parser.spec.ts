@@ -636,7 +636,18 @@ describe("Annotation Parser Unit Tests", () => {
             "/// if_succeeds true;",
             new SProperty(AnnotationType.IfSucceeds, new SBooleanLiteral(true))
         ],
-
+        [
+            "/// @custom:scribble if_succeeds false;",
+            new SProperty(AnnotationType.IfSucceeds, new SBooleanLiteral(false))
+        ],
+        [
+            "/// dshgd_$ $€%^&8()su@custom:scribble if_succeeds false;",
+            new SProperty(AnnotationType.IfSucceeds, new SBooleanLiteral(false))
+        ],
+        [
+            "/// blah1234 @custom:scribble if_succeeds false;",
+            new SProperty(AnnotationType.IfSucceeds, new SBooleanLiteral(false))
+        ],
         [
             '/// if_succeeds {:msg "hi"} true;',
             new SProperty(AnnotationType.IfSucceeds, new SBooleanLiteral(true), "hi")
@@ -884,7 +895,10 @@ describe("Annotation Parser Unit Tests", () => {
                        "bye"
                     }
                     true;
-                     ;`
+                     ;`,
+        `/// dshgd_$ $€%^@&8()su@custom:scribble if_succeeds false;`,
+        `///blah blah @custom:scrible if_succeeds false; dhsgf gfds jdhsg s`,
+        `///blah blah if_succeeds false;`
     ];
 
     for (const [sample, expected] of goodSamples) {
